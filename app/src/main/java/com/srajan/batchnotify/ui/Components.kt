@@ -10,12 +10,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.srajan.batchnotify.R
 
 @Composable
 fun TopBar(title: String, onBack: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 12.dp)) {
-        TextButton(onClick = onBack, contentPadding = PaddingValues(0.dp)) { Text("Back") }
+        TextButton(onClick = onBack, contentPadding = PaddingValues(0.dp)) { Text(stringResource(R.string.back)) }
         Text(title, style = MaterialTheme.typography.headlineSmall)
     }
 }

@@ -39,9 +39,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.srajan.batchnotify.Prefs
+import com.srajan.batchnotify.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -64,9 +66,9 @@ fun AppsScreen(onBack: () -> Unit) {
             .navigationBarsPadding()
             .padding(horizontal = 24.dp)
     ) {
-        TopBar("Important apps", onBack)
+        TopBar(stringResource(R.string.important_apps), onBack)
         Text(
-            "These apps skip batching and notify you right away. Calls and alarms always come through.",
+            stringResource(R.string.apps_description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -74,7 +76,7 @@ fun AppsScreen(onBack: () -> Unit) {
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
-            placeholder = { Text("Search apps") },
+            placeholder = { Text(stringResource(R.string.search_apps)) },
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth(),

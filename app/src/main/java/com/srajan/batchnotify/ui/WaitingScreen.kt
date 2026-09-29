@@ -26,10 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.srajan.batchnotify.HeldStore
+import com.srajan.batchnotify.R
 import com.srajan.batchnotify.Scheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -63,15 +65,15 @@ fun WaitingScreen(onBack: () -> Unit) {
             .navigationBarsPadding()
             .padding(horizontal = 24.dp)
     ) {
-        TopBar("Waiting", onBack)
+        TopBar(stringResource(R.string.waiting_title), onBack)
         val g = groups ?: return@Column
 
         if (g.isEmpty()) {
             Spacer(Modifier.height(48.dp))
-            Text("Nothing waiting", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.nothing_waiting), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text(
-                "Notifications from other apps collect here until the next batch.",
+                stringResource(R.string.nothing_waiting_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -90,7 +92,7 @@ fun WaitingScreen(onBack: () -> Unit) {
         Button(
             onClick = { Scheduler.deliverNow(ctx); groups = emptyMap() },
             modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-        ) { Text("Release all now") }
+        ) { Text(stringResource(R.string.release_all_now)) }
     }
 }
 

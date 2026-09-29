@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Batch Notify</string>
+
+    <!-- Shared -->
+    <string name="back">Back</string>
+    <string name="important_apps">Important apps</string>
+
+    <!-- Home screen -->
+    <string name="home_title">Batch</string>
+    <plurals name="notifications_waiting">
+        <item quantity="one">notification waiting</item>
+        <item quantity="other">notifications waiting</item>
+    </plurals>
+    <string name="status_paused">Paused. Notifications arrive as usual.</string>
+    <string name="status_any_minute">Next batch any minute now</string>
+    <string name="status_next_batch_in">Next batch in %1$s</string>
+    <string name="duration_hours_minutes">%1$dh %2$dm</string>
+    <string name="duration_minutes">%1$dm</string>
+    <string name="release_now">Release now</string>
+    <string name="see_waiting">See waiting</string>
+    <string name="deliver_every">Deliver every</string>
+    <string name="interval_hours">%1$d h</string>
+    <string name="batching">Batching</string>
+    <string name="batching_on">On</string>
+    <string name="batching_off">Off, notifications arrive right away</string>
+    <plurals name="apps_skip_batching">
+        <item quantity="one">%1$d app skips batching</item>
+        <item quantity="other">%1$d apps skip batching</item>
+    </plurals>
+    <string name="edit">Edit</string>
+    <string name="access_title">Turn on notification access</string>
+    <string name="access_body">Batch needs this to hold notifications and release them on your schedule.</string>
+    <string name="open_settings">Open settings</string>
+
+    <!-- Important apps screen -->
+    <string name="apps_description">These apps skip batching and notify you right away. Calls and alarms always come through.</string>
+    <string name="search_apps">Search apps</string>
+
+    <!-- Waiting screen -->
+    <string name="waiting_title">Waiting</string>
+    <string name="nothing_waiting">Nothing waiting</string>
+    <string name="nothing_waiting_body">Notifications from other apps collect here until the next batch.</string>
+    <string name="release_all_now">Release all now</string>
+
+    <!-- Batch notifications -->
+    <string name="channel_name">Batched notifications</string>
+    <string name="batch_title">%1$s (%2$d)</string>
+    <string name="batch_line">%1$s: %2$s</string>
+    <string name="batch_more">+%1$d more</string>
+</resources>

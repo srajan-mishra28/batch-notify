@@ -22,14 +22,14 @@ public final class Notifier {
     public static void postBatch(Context c, JSONArray items) {
         NotificationManager nm = c.getSystemService(NotificationManager.class);
         nm.createNotificationChannel(new NotificationChannel(
-                CHANNEL, "Batched notifications", NotificationManager.IMPORTANCE_DEFAULT));
+                CHANNEL, c.getString(R.string.channel_name), NotificationManager.IMPORTANCE_DEFAULT));
 
         // Group held items by app
         Map<String, List<String>> byApp = new LinkedHashMap<>();
         for (int i = 0; i < items.length(); i++) {
             JSONObject o = items.optJSONObject(i);
             if (o == null) continue;
-            String line = o.optString("title") + ": " + o.optString("text");
+            String line = c.getString(R.string.batch_line, o.optString("title"), o.optString("text"));
             byApp.computeIfAbsent(o.optString("pkg"), k -> new ArrayList<>()).add(line);
         }
 
@@ -40,7 +40,7 @@ public final class Notifier {
 
             Notification.InboxStyle style = new Notification.InboxStyle();
             for (int i = 0; i < Math.min(lines.size(), MAX_LINES); i++) style.addLine(lines.get(i));
-            if (lines.size() > MAX_LINES) style.setSummaryText("+" + (lines.size() - MAX_LINES) + " more");
+            if (lines.size() > MAX_LINES) style.setSummaryText(c.getString(R.string.batch_more, lines.size() - MAX_LINES));
 
             Intent open = pm.getLaunchIntentForPackage(pkg);
             PendingIntent tap = open == null ? null : PendingIntent.getActivity(
@@ -49,7 +49,7 @@ public final class Notifier {
 
             Notification n = new Notification.Builder(c, CHANNEL)
                     .setSmallIcon(android.R.drawable.ic_popup_reminder)
-                    .setContentTitle(label(pm, pkg) + " (" + lines.size() + ")")
+                    .setContentTitle(c.getString(R.string.batch_title, label(pm, pkg), lines.size()))
                     .setContentText(lines.get(0))
                     .setStyle(style)
                     .setContentIntent(tap)
