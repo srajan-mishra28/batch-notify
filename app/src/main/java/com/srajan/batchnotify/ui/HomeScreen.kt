@@ -1,6 +1,7 @@
 package com.srajan.batchnotify.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -51,6 +52,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +61,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.srajan.batchnotify.HeldStore
 import com.srajan.batchnotify.Prefs
+import com.srajan.batchnotify.R
 import com.srajan.batchnotify.Scheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -110,7 +114,7 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
-        Text("Batch", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.home_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
 
         if (!hasAccess) {
             Spacer(Modifier.height(16.dp))
@@ -124,7 +128,7 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("$held", style = MaterialTheme.typography.displayLarge)
                 Text(
-                    if (held == 1) "notification waiting" else "notifications waiting",
+                    pluralStringResource(R.plurals.notifications_waiting, held),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -134,9 +138,9 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Text(
             text = when {
-                !enabled -> "Paused. Notifications arrive as usual."
-                remaining <= 60_000L -> "Next batch any minute now"
-                else -> "Next batch in ${formatDuration(remaining)}"
+                !enabled -> stringResource(R.string.status_paused)
+                remaining <= 60_000L -> stringResource(R.string.status_any_minute)
+                else -> stringResource(R.string.status_next_batch_in, formatDuration(ctx, remaining))
             },
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
@@ -149,12 +153,12 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
                 onClick = { Scheduler.deliverNow(ctx); held = 0 },
                 enabled = held > 0,
                 modifier = Modifier.weight(1f),
-            ) { Text("Release now") }
-            OutlinedButton(onClick = onOpenWaiting, modifier = Modifier.weight(1f)) { Text("See waiting") }
+            ) { Text(stringResource(R.string.release_now)) }
+            OutlinedButton(onClick = onOpenWaiting, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.see_waiting)) }
         }
 
         Spacer(Modifier.height(36.dp))
-        SectionLabel("Deliver every")
+        SectionLabel(stringResource(R.string.deliver_every))
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             INTERVALS.forEachIndexed { i, h ->
                 SegmentedButton(
@@ -165,12 +169,15 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
                         Scheduler.schedule(ctx, true)
                     },
                     shape = SegmentedButtonDefaults.itemShape(index = i, count = INTERVALS.size),
-                ) { Text("$h h") }
+                ) { Text(stringResource(R.string.interval_hours, h)) }
             }
         }
 
         Spacer(Modifier.height(24.dp))
-        SettingRow("Batching", if (enabled) "On" else "Off, notifications arrive right away") {
+        SettingRow(
+            stringResource(R.string.batching),
+            stringResource(if (enabled) R.string.batching_on else R.string.batching_off),
+        ) {
             Switch(checked = enabled, onCheckedChange = { on ->
                 enabled = on
                 Prefs.setEnabled(ctx, on)
@@ -179,11 +186,11 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
         SettingRow(
-            title = "Important apps",
-            subtitle = if (importantCount == 1) "1 app skips batching" else "$importantCount apps skip batching",
+            title = stringResource(R.string.important_apps),
+            subtitle = pluralStringResource(R.plurals.apps_skip_batching, importantCount, importantCount),
             onClick = onOpenApps,
         ) {
-            Text("Edit", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.edit), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
         }
     }
 }
@@ -232,14 +239,14 @@ private fun AccessCard(onGrant: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(20.dp)) {
-            Text("Turn on notification access", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.access_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
             Text(
-                "Batch needs this to hold notifications and release them on your schedule.",
+                stringResource(R.string.access_body),
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(Modifier.height(12.dp))
-            Button(onClick = onGrant) { Text("Open settings") }
+            Button(onClick = onGrant) { Text(stringResource(R.string.open_settings)) }
         }
     }
 }
@@ -266,9 +273,9 @@ private fun SettingRow(
     }
 }
 
-private fun formatDuration(ms: Long): String {
+private fun formatDuration(ctx: Context, ms: Long): String {
     val totalMin = ms / 60_000
     val h = totalMin / 60
     val m = totalMin % 60
-    return if (h > 0) "${h}h ${m}m" else "${m}m"
+    return if (h > 0) ctx.getString(R.string.duration_hours_minutes, h, m) else ctx.getString(R.string.duration_minutes, m)
 }
