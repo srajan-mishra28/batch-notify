@@ -6,8 +6,9 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
+import androidx.work.ExistingWorkPolicy;
 import java.util.concurrent.TimeUnit;
-import java.util.Calender;
+import java.util.Calendar;
 
 /** Schedules the batch job. WorkManager keeps it alive across reboots , and optional additional daily delivery*/
 public final class Scheduler {
@@ -33,7 +34,7 @@ public final class Scheduler {
 
     /** Schedule the optional additional delivery at the user's daily clock time. */
     public static void scheduleDailyTime(Context c) {
-        if (!Prefs.hasDailyTime()) return;
+        if (!Prefs.hasDailyTime(c)) return;
 
         Calendar now = Calendar.getInstance();
         Calendar next = Calendar.getInstance();

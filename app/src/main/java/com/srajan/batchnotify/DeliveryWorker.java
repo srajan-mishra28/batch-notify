@@ -29,7 +29,7 @@ public class DeliveryWorker extends Worker {
         }
 
         // A daily run schedules the next occurrence for tomorrow.
-        if (daily && Prefs.hasDailyTime()) {
+        if (daily && Prefs.hasDailyTime(c)) {
             Scheduler.scheduleDailyTime(c);
         }
 

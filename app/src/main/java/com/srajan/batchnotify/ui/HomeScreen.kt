@@ -1,11 +1,13 @@
 package com.srajan.batchnotify.ui
 
 import android.Manifest
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
+import android.text.format.DateFormat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
@@ -68,6 +70,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.cos
 import kotlin.math.sin
+import java.util.Calendar;
 
 private val INTERVALS = listOf(3, 4, 6, 12)
 
@@ -210,7 +213,7 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
                         },
                         initial.get(Calendar.HOUR_OF_DAY),
                         initial.get(Calendar.MINUTE),
-                        android.text.format.DateFormat.is24HourFormat(ctx)
+                        DateFormat.is24HourFormat(ctx)
                     ).show()
                 }
             } else null,
