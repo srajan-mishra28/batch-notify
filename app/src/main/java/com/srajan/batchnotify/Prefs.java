@@ -21,6 +21,18 @@ public final class Prefs {
     public static long nextBatchAt(Context c) { return sp(c).getLong("next", 0L); }
     public static void setNextBatchAt(Context c, long time) { sp(c).edit().putLong("next", time).apply(); }
 
+
+    public static boolean hasDailyTime(Context c) { return sp(c).contains("daily_hour") && sp(c).contains("daily_minute"); }
+    public static int dailyHour(Context c) { return sp(c).getInt("daily_hour", 0); }
+    public static int dailyMinute(Context c) { return sp(c).getInt("daily_minute", 0); }
+    public static void setDailyTime(Context c, int hour, int minute) {
+        sp(c).edit().putInt("daily_hour", hour).putInt("daily_minute", minute).apply();
+    }
+    public static void clearDailyTime(Context c) {
+        sp(c).edit().remove("daily_hour").remove("daily_minute").apply();
+    }
+
+
     public static Set<String> allowlist(Context c) {
         return new HashSet<>(sp(c).getStringSet("allow", new HashSet<>()));
     }
