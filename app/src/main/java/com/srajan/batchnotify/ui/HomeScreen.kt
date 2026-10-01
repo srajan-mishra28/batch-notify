@@ -1,11 +1,13 @@
 package com.srajan.batchnotify.ui
 
 import android.Manifest
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
+import android.text.format.DateFormat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
@@ -68,6 +70,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.math.cos
 import kotlin.math.sin
+import java.util.Calendar;
 
 private val INTERVALS = listOf(3, 4, 6, 12)
 
@@ -81,6 +84,9 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
     var held by remember { mutableIntStateOf(0) }
     var interval by remember { mutableIntStateOf(Prefs.intervalHours(ctx)) }
     var enabled by remember { mutableStateOf(Prefs.isEnabled(ctx)) }
+    var dailyTimeSet by remember { mutableStateOf(Prefs.hasDailyTime(ctx)) }
+    var dailyHour by remember { mutableIntStateOf(Prefs.dailyHour(ctx)) }
+    var dailyMinute by remember { mutableIntStateOf(Prefs.dailyMinute(ctx)) }
     val importantCount = remember { Prefs.allowlist(ctx).size }
 
     val askPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -173,7 +179,74 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
             }
         }
 
+//        Spacer(Modifier.height(24.dp))
+//        SettingRow(
+//            stringResource(R.string.batching),
+//            stringResource(if (enabled) R.string.batching_on else R.string.batching_off),
+//        ) {
+//            Switch(checked = enabled, onCheckedChange = { on ->
+//                enabled = on
+//                Prefs.setEnabled(ctx, on)
+//                if (on) Scheduler.schedule(ctx, true) else Scheduler.deliverNow(ctx)
+//            })
+//        }
+
         Spacer(Modifier.height(24.dp))
+        SectionLabel("Additional daily delivery")
+        SettingRow(
+            title = if (dailyTimeSet) "Every day at ${formatTime(ctx, dailyHour, dailyMinute)}" else "No additional time set",
+            subtitle = "This is added to your ${interval}h schedule; it does not replace it.",
+            onClick = if (enabled) {
+                {
+                    val initial = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, dailyHour)
+                        set(Calendar.MINUTE, dailyMinute)
+                    }
+                    TimePickerDialog(
+                        ctx,
+                        { _, hour, minute ->
+                            dailyHour = hour
+                            dailyMinute = minute
+                            dailyTimeSet = true
+                            Prefs.setDailyTime(ctx, hour, minute)
+                            Scheduler.scheduleDailyTime(ctx)
+                        },
+                        initial.get(Calendar.HOUR_OF_DAY),
+                        initial.get(Calendar.MINUTE),
+                        DateFormat.is24HourFormat(ctx)
+                    ).show()
+                }
+            } else null,
+        ) {
+            if (dailyTimeSet) {
+                OutlinedButton(onClick = {
+                    dailyTimeSet = false
+                    Prefs.clearDailyTime(ctx)
+                    Scheduler.cancelDailyTime(ctx)
+                }) { Text("Remove") }
+            } else {
+                Button(onClick = {
+                    val now = Calendar.getInstance()
+                    TimePickerDialog(
+                        ctx,
+                        { _, hour, minute ->
+                            dailyHour = hour
+                            dailyMinute = minute
+                            dailyTimeSet = true
+                            Prefs.setDailyTime(ctx, hour, minute)
+                            if (enabled) Scheduler.scheduleDailyTime(ctx)
+                        },
+                        now.get(Calendar.HOUR_OF_DAY),
+                        now.get(Calendar.MINUTE),
+                        android.text.format.DateFormat.is24HourFormat(ctx)
+                    ).show()
+                }, enabled = enabled) { Text("Add time") }
+            }
+        }
+
+
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
         SettingRow(
             stringResource(R.string.batching),
             stringResource(if (enabled) R.string.batching_on else R.string.batching_off),
@@ -181,9 +254,17 @@ fun HomeScreen(onOpenApps: () -> Unit, onOpenWaiting: () -> Unit) {
             Switch(checked = enabled, onCheckedChange = { on ->
                 enabled = on
                 Prefs.setEnabled(ctx, on)
-                if (on) Scheduler.schedule(ctx, true) else Scheduler.deliverNow(ctx)
+                if (on) {
+                    Scheduler.schedule(ctx, true)
+                    if (dailyTimeSet) Scheduler.scheduleDailyTime(ctx)
+                } else {
+                    Scheduler.cancelDailyTime(ctx)
+                    Scheduler.deliverNow(ctx)
+                }
             })
         }
+
+
         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
         SettingRow(
             title = stringResource(R.string.important_apps),
@@ -271,6 +352,14 @@ private fun SettingRow(
         }
         trailing()
     }
+}
+
+private fun formatTime(ctx: Context, hour: Int, minute: Int): String {
+    val cal = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, hour)
+        set(Calendar.MINUTE, minute)
+    }
+    return android.text.format.DateFormat.getTimeFormat(ctx).format(cal.time)
 }
 
 private fun formatDuration(ctx: Context, ms: Long): String {

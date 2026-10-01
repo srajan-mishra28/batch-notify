@@ -19,11 +19,20 @@ public class DeliveryWorker extends Worker {
         JSONArray items = HeldStore.drain(c);
         if (items.length() > 0) Notifier.postBatch(c, items);
 
-        // Scheduled runs move the "next batch" clock forward. Manual releases don't.
-        if (!getInputData().getBoolean(Scheduler.KEY_MANUAL, false)) {
+        boolean manual = getInputData().getBoolean(Scheduler.KEY_MANUAL, false);
+        boolean daily = getInputData().getBoolean(Scheduler.KEY_DAILY, false);
+
+        // Interval runs move the next interval clock forward. Manual releases don't.
+        if (!manual && !daily) {
             Prefs.setNextBatchAt(c, System.currentTimeMillis()
                     + TimeUnit.HOURS.toMillis(Prefs.intervalHours(c)));
         }
+
+        // A daily run schedules the next occurrence for tomorrow.
+        if (daily && Prefs.hasDailyTime(c)) {
+            Scheduler.scheduleDailyTime(c);
+        }
+
         return Result.success();
     }
 }
